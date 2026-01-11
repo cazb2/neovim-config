@@ -12,16 +12,7 @@
 -- Built-in plugins
 local builtin_plugins = {
   { "nvim-lua/plenary.nvim" },
-  -- File explore
-  -- nvim-tree.lua - A file explorer tree for neovim written in lua
-  {
-    "nvim-tree/nvim-tree.lua",
-    dependencies = {
-      "nvim-tree/nvim-web-devicons",
-      opt = true,
-    },
-    opts = function() require "plugins.configs.tree" end,
-  },
+  { "nvim-tree/nvim-web-devicons" },
   -- Formatter
   -- Lightweight yet powerful formatter plugin for Neovim
   {
@@ -76,6 +67,17 @@ local builtin_plugins = {
     opts = function() require "plugins.configs.treesitter" end,
   },
   {
+    "nvim-treesitter/nvim-treesitter-textobjects",
+    event = { "BufReadPost", "BufNewFile" },
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+  },
+  {
+    "m-demare/hlargs.nvim",
+    event = { "BufReadPost", "BufNewFile" },
+    dependencies = { "nvim-treesitter/nvim-treesitter" },
+    opts = function() return require "plugins.configs.hlargs" end,
+  },
+  {
     "windwp/nvim-ts-autotag",
     event = { "BufReadPost", "BufNewFile" },
     opts = {},
@@ -107,6 +109,21 @@ local builtin_plugins = {
         pcall(telescope.load_extension, ext)
       end
     end,
+  },
+  {
+    "stevearc/aerial.nvim",
+    cmd = { "AerialToggle", "AerialOpen", "AerialClose", "AerialNavToggle" },
+    dependencies = {
+      "nvim-treesitter/nvim-treesitter",
+      "nvim-tree/nvim-web-devicons",
+    },
+    opts = function() return require "plugins.configs.aerial" end,
+  },
+  {
+    "folke/trouble.nvim",
+    cmd = "Trouble",
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    opts = function() return require "plugins.configs.trouble" end,
   },
   -- Terminal integration
   {
@@ -260,6 +277,7 @@ require("lazy").setup {
     -- version = "*", -- enable this to try installing the latest stable versions of plugins
   },
   ui = {
+    border = "single",
     icons = {
       ft = "",
       lazy = "󰂠",

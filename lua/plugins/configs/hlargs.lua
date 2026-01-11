@@ -1,3 +1,3 @@
-return {
-  'm-demare/hlargs.nvim', require('hlargs').setup()
-}
+-- File: plugins/configs/hlargs.lua
+-- Description: hlargs configuration
+return {}

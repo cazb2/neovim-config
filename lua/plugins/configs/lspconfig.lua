@@ -11,6 +11,14 @@
 -- Author: Kien Nguyen-Tuan <kiennt2609@gmail.com>
 local merge_tables = require("utils").merge_tables
 
+local hover_opts = {
+  border = { " ", " ", " ", " ", " ", " ", " ", " " },
+  max_width = 80,
+  max_height = 20,
+}
+vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, hover_opts)
+vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, hover_opts)
+
 local exist, custom = pcall(require, "custom")
 local custom_formatting_servers = exist and type(custom) == "table" and custom.formatting_servers or {}
 local formatting_servers = {
@@ -122,5 +130,42 @@ require("mason-lspconfig").setup {
   -- `vim.lsp.enable()` is only available on newer Neovim versions.
   automatic_enable = has_lsp_enable,
 }
+
+local ok_ft_map, ft_map = pcall(require, "mason-lspconfig.mappings.filetype")
+local ok_srv_map, srv_map = pcall(require, "mason-lspconfig.mappings.server")
+local ok_registry, registry = pcall(require, "mason-registry")
+local attempted_installs = {}
+
+local function ensure_server_installed(server)
+  if attempted_installs[server] then return end
+  attempted_installs[server] = true
+
+  if not ok_registry or not ok_srv_map then return end
+  local pkg_name = srv_map.lspconfig_to_package[server]
+  if not pkg_name or not registry.has_package(pkg_name) then return end
+
+  local ok_pkg, pkg = pcall(registry.get_package, pkg_name)
+  if not ok_pkg or pkg:is_installed() or pkg:is_installing() then return end
+  pkg:install()
+end
+
+if ok_ft_map then
+  vim.api.nvim_create_autocmd("FileType", {
+    callback = function(args)
+      local ft = args.match
+      local ft_servers = ft_map.filetype_to_server[ft]
+      if type(ft_servers) == "string" then
+        ft_servers = { ft_servers }
+      end
+      if type(ft_servers) ~= "table" then return end
+
+      for _, server in ipairs(ft_servers) do
+        if servers[server] ~= nil then
+          ensure_server_installed(server)
+        end
+      end
+    end,
+  })
+end
 
 -- run :lua vim.lsp.inlay_hint.enable(true)

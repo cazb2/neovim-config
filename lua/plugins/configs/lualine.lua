@@ -11,7 +11,6 @@
 -- Author: Kien Nguyen-Tuan <kiennt2609@gmail.com>
 
 local lualine = require "lualine"
-local utils = require "utils"
 
 local conditions = {
     buffer_not_empty = function() return vim.fn.empty(vim.fn.expand "%:t") ~= 1 end,
@@ -44,7 +43,7 @@ local config = {
         theme = auto,
         component_separators = "",
         section_separators = "",
-        disabled_filetypes = { "Lazy", "NvimTree" },
+        disabled_filetypes = { "Lazy" },
     },
 
     sections = {
@@ -70,23 +69,11 @@ local config = {
             {
                 "buffers",
                 max_length = vim.o.columns * 2 / 3,
-                show_filename_only = false,
+                show_filename_only = true,
+                hide_filename_extension = false,
+                icons_enabled = true,
                 mode = 0,
-                right_padding = 5,
-                left_padding = 5,
-                use_mode_colors = true,
-                buffers_color = {
-                    -- Same values as the general color option can be used here.
-                    active = {
-                        fg = utils.darken(auto.normal.a.fg, 1.2),
-                        bg = auto.normal.a.bg,
-                        gui = "bold",
-                    },
-                    inactive = {
-                        fg = auto.normal.a.fg,
-                        bg = auto.normal.a.bg,
-                    },
-                },
+                use_mode_colors = false,
                 symbols = {
                     modified = " ●",
                     alternate_file = "",
@@ -96,7 +83,7 @@ local config = {
         },
     },
 
-    extensions = { "nvim-tree", "mason", "fzf" },
+    extensions = { "mason", "fzf" },
 }
 
 -- Mode symbol
@@ -141,7 +128,7 @@ ins_left {
 
 ins_left {
     "diff",
-    symbols = { added = " ", modified = "󰝤 ", removed = " " },
+    symbols = { added = " ", modified = "~ ", removed = " " },
     cond = conditions.hide_in_width,
 }
 
