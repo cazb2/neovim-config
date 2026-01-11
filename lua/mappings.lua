@@ -12,16 +12,30 @@
 
 -- <leader> is a space now
 local map = vim.keymap.set
-local cmd = vim.cmd
+local function call_telescope_ext(extension, picker)
+    return function()
+        local ok, telescope = pcall(require, "telescope")
+        if not ok then
+            vim.notify("Telescope is not available", vim.log.levels.ERROR)
+            return
+        end
+        local ext = telescope.extensions[extension]
+        if not ext or type(ext[picker]) ~= "function" then
+            vim.notify(("Telescope extension '%s' is not available"):format(extension), vim.log.levels.ERROR)
+            return
+        end
+        ext[picker]()
+    end
+end
 
 map("n", "<leader>q", ":qa!<CR>", {})
 -- Fast saving with <leader> and s
 map("n", "<leader>s", ":w<CR>", {})
 -- Move around splits
 map("n", "<leader>wh", "<C-w>h", { desc = "switch window left" })
-map("n", "<leader>wj", "<C-w>j", { desc = "switch window right" })
+map("n", "<leader>wl", "<C-w>j", { desc = "switch window right" })
 map("n", "<leader>wk", "<C-w>k", { desc = "switch window up" })
-map("n", "<leader>wl", "<C-w>l", { desc = "switch window down" })
+map("n", "<leader>wj", "<C-w>l", { desc = "switch window down" })
 
 -- Reload configuration without restart nvim
 -- Or you don't want to use plenary.nvim, you can use this code
@@ -53,6 +67,15 @@ map("n", "<leader>fb", builtin.buffers, { desc = "Open Telescope to list buffers
 map("n", "<leader>fh", builtin.help_tags, { desc = "Open Telescope to show help" })
 map("n", "<leader>fo", builtin.oldfiles, { desc = "Open Telescope to list recent files" })
 map("n", "<leader>cm", builtin.git_commits, { desc = "Open Telescope to list git commits" })
+map("n", "<leader>gc", builtin.git_commits, { desc = "Open Telescope to list git commits" })
+map("n", "<leader>gS", builtin.git_status, { desc = "Open Telescope git status" })
+map("n", "<leader>gL", "<cmd>LazyGit<CR>", { desc = "Open LazyGit interface" })
+map("n", "<leader>gd", "<cmd>DiffviewOpen<CR>", { desc = "Open Diffview" })
+map("n", "<leader>gD", "<cmd>DiffviewClose<CR>", { desc = "Close Diffview" })
+map("n", "<leader>gh", "<cmd>DiffviewFileHistory %<CR>", { desc = "Diffview file history" })
+map("n", "<leader>gH", "<cmd>DiffviewFileHistory<CR>", { desc = "Diffview project history" })
+map("n", "<leader>gw", call_telescope_ext("git_worktree", "git_worktrees"), { desc = "Browse git worktrees" })
+map("n", "<leader>gW", call_telescope_ext("git_worktree", "create_git_worktree"), { desc = "Create git worktree" })
 -- NvimTree
 map("n", "<leader>n", ":NvimTreeToggle<CR>", { desc = "Toggle NvimTree sidebar" }) -- open/close
 map("n", "<leader>nr", ":NvimTreeRefresh<CR>", { desc = "Refresh NvimTree" }) -- refresh
@@ -74,7 +97,5 @@ map("n", "mm", "gcc", { desc = "Toggle comment", remap = true })
 map("v", "mm", "gc", { desc = "Toggle comment", remap = true })
 
 -- Terminal
-map("n", "tt", function()
-    local height = math.floor(vim.o.lines / 2)
-    cmd("belowright split | resize " .. height .. " | terminal")
-end, { noremap = true, silent = true })
+map("n", "tt", "<cmd>ToggleTerm direction=float<CR>", { desc = "Toggle floating terminal" })
+map("t", "<Esc>", [[<C-\><C-n>]], { desc = "Exit terminal mode" })

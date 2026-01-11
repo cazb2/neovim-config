@@ -11,19 +11,22 @@
 return {
     signs = {
         add = {
-            text = " ",
+            text = "+ ",
         },
         change = {
-            text = " ",
+            text = "~ ",
         },
         delete = {
-            text = " ",
+            text = "- ",
         },
         topdelete = {
-            text = "󱅁 ",
+            text = "‾ ",
         },
         changedelete = {
-            text = "󰍷 ",
+            text = "≃ ",
+        },
+        untracked = {
+            text = "? ",
         },
     },
     signcolumn = true, -- Toggle with `:Gitsigns toggle_signs`

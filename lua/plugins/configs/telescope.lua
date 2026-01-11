@@ -27,7 +27,16 @@ return {
             n = { ["q"] = require("telescope.actions").close },
         },
     },
-
-    extensions_list = { "themes", "terms" },
-    extensions = {},
+    pickers = {
+        git_status = { theme = "ivy", initial_mode = "normal" },
+        git_commits = { theme = "ivy" },
+        git_bcommits = { theme = "ivy" },
+        git_branches = { theme = "dropdown" },
+    },
+    extensions_list = { "themes", "terms", "git_worktree" },
+    extensions = {
+        git_worktree = {
+            theme = "ivy",
+        },
+    },
 }
