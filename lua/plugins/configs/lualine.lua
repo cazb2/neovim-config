@@ -132,6 +132,13 @@ ins_left {
     cond = conditions.hide_in_width,
 }
 
+ins_left {
+    "filename",
+    cond = conditions.buffer_not_empty,
+    path = 1, -- relative path
+    symbols = { modified = " ●", readonly = " ", unnamed = "[No Name]" },
+}
+
 ins_left { function() return "%=" end }
 
 -- Right side

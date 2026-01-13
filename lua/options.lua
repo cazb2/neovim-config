@@ -15,6 +15,7 @@ local opt = vim.opt
 -- Global variables
 local g = vim.g
 local indent = 2
+local platform = require "utils.platform"
 
 g.mapleader = " "
 
@@ -24,22 +25,30 @@ cmd [[
 cmd "syntax enable"
 
 opt.backspace = { "eol", "start", "indent" } -- allow backspacing over everything in insert mode
-opt.clipboard = "unnamedplus"                -- allow neovim to access the system clipboard
-if vim.env.SSH_TTY then
+local function setup_clipboard()
+  if vim.env.SSH_TTY then
     vim.g.clipboard = {
-        name = "OSC52",
-        copy = {
-            ["+"] = require("vim.ui.clipboard.osc52").copy,
-            ["*"] = require("vim.ui.clipboard.osc52").copy,
-        },
-        paste = {
-            ["+"] = require("vim.ui.clipboard.osc52").paste,
-            ["*"] = require("vim.ui.clipboard.osc52").paste,
-        },
+      name = "OSC52",
+      copy = {
+        ["+"] = require("vim.ui.clipboard.osc52").copy,
+        ["*"] = require("vim.ui.clipboard.osc52").copy,
+      },
+      paste = {
+        ["+"] = require("vim.ui.clipboard.osc52").paste,
+        ["*"] = require("vim.ui.clipboard.osc52").paste,
+      },
     }
+    opt.clipboard = "unnamedplus"
+    return
+  end
+
+  if platform.has_clipboard() then
+    opt.clipboard = "unnamedplus"     -- allow neovim to access the system clipboard
+  end
 end
-vim.opt_global.fileencoding = "utf-8"        -- the encoding written to a file
-vim.opt_global.encoding = "utf-8"            -- the encoding
+setup_clipboard()
+vim.opt_global.fileencoding = "utf-8" -- the encoding written to a file
+vim.opt_global.encoding = "utf-8"     -- the encoding
 opt.matchpairs = { "(:)", "{:}", "[:]", "<:>" }
 
 -- indention
@@ -68,11 +77,11 @@ opt.lazyredraw = true -- don"t update the display while executing macros
 opt.list = true
 -- You can also add "space" or "eol", but I feel it"s quite annoying
 opt.listchars = {
-	tab = "┊ ",
-	trail = "·",
-	extends = "»",
-	precedes = "«",
-	nbsp = "×",
+  tab = "┊ ",
+  trail = "·",
+  extends = "»",
+  precedes = "«",
+  nbsp = "×",
 }
 
 -- Hide cmd line
@@ -95,7 +104,7 @@ opt.writebackup = false -- if a file is being edited by another program (or was 
 -- autocomplete
 opt.completeopt = { "menu", "menuone", "noselect" } -- mostly just for cmp
 opt.shortmess = opt.shortmess + {
-	c = true,
+  c = true,
 } -- hide all the completion messages, e.g. "-- XXX completion (YYY)", "match 1 of 2", "The only match", "Pattern not found"
 
 -- By the way, -- INSERT -- is unnecessary anymore because the mode information is displayed in the statusline.
@@ -105,7 +114,7 @@ opt.showmode = false
 -- remember N lines in history
 opt.history = 100    -- keep 100 lines of history
 opt.redrawtime = 1500
-opt.timeoutlen = 250 -- time to wait for a mapped sequence to complete (in milliseconds)
+opt.timeoutlen = 500 -- time to wait for a mapped sequence to complete (in milliseconds)
 opt.ttimeoutlen = 10
 opt.updatetime = 100 -- signify default updatetime 4000ms is not good for async update
 
@@ -113,8 +122,11 @@ opt.updatetime = 100 -- signify default updatetime 4000ms is not good for async 
 opt.termguicolors = true -- enable 24-bit RGB colors
 
 -- persistent undo
--- Don"t forget to create folder $HOME/.local/share/nvim/undo
+-- Persistent undo directory at stdpath("data") .. "/undo"
 local undodir = vim.fn.stdpath "data" .. "/undo"
+if vim.fn.isdirectory(undodir) == 0 then
+  vim.fn.mkdir(undodir, "p")
+end
 opt.undofile = true -- enable persistent undo
 opt.undodir = undodir
 opt.undolevels = 1000
@@ -126,31 +138,31 @@ opt.foldlevel = 99
 
 -- Disable builtin plugins
 local disabled_built_ins = {
-	"2html_plugin",
-	"getscript",
-	"getscriptPlugin",
-	"gzip",
-	"logipat",
-	"matchit",
-	"tar",
-	"tarPlugin",
-	"rrhelper",
-	"spellfile_plugin",
-	"vimball",
-	"vimballPlugin",
-	"zip",
-	"zipPlugin",
-	"tutor",
-	"rplugin",
-	"synmenu",
-	"optwin",
-	"compiler",
-	"bugreport",
-	"ftplugin",
+  "2html_plugin",
+  "getscript",
+  "getscriptPlugin",
+  "gzip",
+  "logipat",
+  "matchit",
+  "tar",
+  "tarPlugin",
+  "rrhelper",
+  "spellfile_plugin",
+  "vimball",
+  "vimballPlugin",
+  "zip",
+  "zipPlugin",
+  "tutor",
+  "rplugin",
+  "synmenu",
+  "optwin",
+  "compiler",
+  "bugreport",
+  "ftplugin",
 }
 
 for _, plugin in pairs(disabled_built_ins) do
-	g["loaded_" .. plugin] = 1
+  g["loaded_" .. plugin] = 1
 end
 
 -- Colorscheme
@@ -158,14 +170,14 @@ cmd.colorscheme "catppuccin"
 
 -- Enable virtual_lines feature if the current nvim version is 0.11+
 if vim.fn.has "nvim-0.11" > 0 then
-	vim.diagnostic.config {
-		-- Use the default configuration
-		-- virtual_lines = true,
+  vim.diagnostic.config {
+    -- Use the default configuration
+    -- virtual_lines = true,
 
-		-- Alternatively, customize specific options
-		virtual_lines = {
-			-- Only show virtual line diagnostics for the current cursor line
-			current_line = true,
-		},
-	}
+    -- Alternatively, customize specific options
+    virtual_lines = {
+      -- Only show virtual line diagnostics for the current cursor line
+      current_line = true,
+    },
+  }
 end

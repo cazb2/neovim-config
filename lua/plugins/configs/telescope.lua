@@ -33,10 +33,5 @@ return {
         git_bcommits = { theme = "ivy" },
         git_branches = { theme = "dropdown" },
     },
-    extensions_list = { "themes", "terms", "git_worktree" },
-    extensions = {
-        git_worktree = {
-            theme = "ivy",
-        },
-    },
+    extensions_list = { "themes", "terms" },
 }

@@ -8,11 +8,19 @@
 --
 -- File: plugins/init.lua
 -- Description: init plugins config
+local platform = require "utils.platform"
+local has_make = platform.has "make"
 
 -- Built-in plugins
 local builtin_plugins = {
   { "nvim-lua/plenary.nvim" },
   { "nvim-tree/nvim-web-devicons" },
+  {
+    "nvim-tree/nvim-tree.lua",
+    cmd = { "NvimTreeToggle", "NvimTreeFocus" },
+    dependencies = { "nvim-tree/nvim-web-devicons" },
+    opts = function() return require "plugins.configs.nvim-tree" end,
+  },
   -- Formatter
   -- Lightweight yet powerful formatter plugin for Neovim
   {
@@ -29,34 +37,10 @@ local builtin_plugins = {
   {
     "lewis6991/gitsigns.nvim",
     event = { "BufReadPost", "BufNewFile", "BufWritePost" },
-    opts = function() require "plugins.configs.gitsigns" end,
+    opts = function() return require "plugins.configs.gitsigns" end,
   },
-  -- Git workflows & visualizations
-  {
-    "sindrets/diffview.nvim",
-    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory", "DiffviewFocusFiles" },
-    opts = function() return require "plugins.configs.diffview" end,
-  },
-  {
-    "ThePrimeagen/git-worktree.nvim",
-    dependencies = { "nvim-telescope/telescope.nvim" },
-    opts = function() return require "plugins.configs.git_worktree" end,
-    config = function(_, opts)
-      local git_worktree = require "git-worktree"
-      git_worktree.setup(opts)
-
-      local ok, telescope = pcall(require, "telescope")
-      if ok then pcall(telescope.load_extension, "git_worktree") end
-    end,
-  },
-  {
-    "kdheepak/lazygit.nvim",
-    cmd = { "LazyGit", "LazyGitConfig", "LazyGitCurrentFile", "LazyGitFilter", "LazyGitFilterCurrentFile" },
-    dependencies = { "nvim-lua/plenary.nvim" },
-    init = function()
-      vim.g.lazygit_floating_window_border_chars = { "█", "█", "█", "█" }
-    end,
-  },
+  -- Git integration
+  { "tpope/vim-fugitive" },
   -- Treesitter interface
   {
     "nvim-treesitter/nvim-treesitter",
@@ -95,7 +79,7 @@ local builtin_plugins = {
       "nvim-treesitter/nvim-treesitter",
       {
         "nvim-telescope/telescope-fzf-native.nvim",
-        build = "make",
+        build = has_make and "make" or nil,
       },
     },
     cmd = "Telescope",
@@ -105,7 +89,7 @@ local builtin_plugins = {
       telescope.setup(opts)
 
       -- Load optional extensions when available
-      for _, ext in ipairs { "fzf", "git_worktree" } do
+      for _, ext in ipairs { "fzf" } do
         pcall(telescope.load_extension, ext)
       end
     end,
@@ -118,12 +102,6 @@ local builtin_plugins = {
       "nvim-tree/nvim-web-devicons",
     },
     opts = function() return require "plugins.configs.aerial" end,
-  },
-  {
-    "folke/trouble.nvim",
-    cmd = "Trouble",
-    dependencies = { "nvim-tree/nvim-web-devicons" },
-    opts = function() return require "plugins.configs.trouble" end,
   },
   -- Terminal integration
   {
@@ -159,6 +137,11 @@ local builtin_plugins = {
     "mason-org/mason-lspconfig.nvim",
   },
   {
+    "jay-babu/mason-nvim-dap.nvim",
+    dependencies = { "mason.nvim", "mfussenegger/nvim-dap" },
+    opts = function() return require "plugins.configs.mason-dap" end,
+  },
+  {
     "nvimtools/none-ls.nvim",
     event = { "BufReadPre", "BufNewFile" },
     dependencies = { "nvimtools/none-ls-extras.nvim" },
@@ -170,6 +153,14 @@ local builtin_plugins = {
     event = "VimEnter",
     lazy = false,
     config = function() require "plugins.configs.lspconfig" end,
+  },
+  {
+    "mfussenegger/nvim-dap",
+    dependencies = {
+      "rcarriga/nvim-dap-ui",
+      "theHamsta/nvim-dap-virtual-text",
+    },
+    config = function() require "plugins.configs.dap" end,
   },
   {
     "hrsh7th/nvim-cmp",
@@ -238,7 +229,7 @@ local builtin_plugins = {
       { "zbirenbaum/copilot.lua" },
       { "nvim-lua/plenary.nvim", branch = "master" }, -- for curl, log and async functions
     },
-    build = "make tiktoken",                       -- Only on MacOS or Linux
+    build = has_make and "make tiktoken" or nil, -- Only on MacOS or Linux
     opts = {
       -- See Configuration section for options
       model = "claude-3.5-sonnet",
@@ -259,7 +250,7 @@ local builtin_plugins = {
   {
     "folke/which-key.nvim",
     event = "VeryLazy",
-    config = function() require("which-key").setup() end,
+    config = function() require("which-key").setup(require "plugins.configs.which-key") end,
   },
 }
 

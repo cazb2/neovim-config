@@ -12,6 +12,7 @@
 -- Define autocommands with Lua APIs
 -- See: h:api-autocmd, h:augroup
 local autocmd = vim.api.nvim_create_autocmd -- Create autocommand
+local session = require "utils.session"
 
 -- General settings
 
@@ -53,6 +54,35 @@ autocmd("Filetype", {
     callback = function()
         vim.opt_local.wrap = true
         vim.opt_local.spell = true
+    end,
+})
+
+autocmd("Filetype", {
+    pattern = { "dap-repl", "dapui_console" },
+    callback = function(args)
+        local buf = args.buf
+        vim.bo[buf].buflisted = true
+        vim.bo[buf].bufhidden = "hide"
+    end,
+})
+
+autocmd("TermOpen", {
+    callback = function(args)
+        vim.keymap.set("t", "<Esc>", [[<C-\><C-n>]], { buffer = args.buf, desc = "Exit terminal mode" })
+    end,
+})
+
+autocmd("VimLeavePre", {
+    callback = function()
+        pcall(session.save)
+    end,
+})
+
+autocmd("VimEnter", {
+    callback = function()
+        local ok_session, session_mod = pcall(require, "utils.session")
+        if not ok_session then return end
+        pcall(session_mod.load)
     end,
 })
 
