@@ -56,6 +56,15 @@ autocmd("Filetype", {
     end,
 })
 
+autocmd("Filetype", {
+    pattern = { "dap-repl", "dapui_console" },
+    callback = function(args)
+        local buf = args.buf
+        vim.bo[buf].buflisted = true
+        vim.bo[buf].bufhidden = "hide"
+    end,
+})
+
 autocmd({ "ColorScheme" }, {
     callback = function()
         vim.cmd [[hi Lualine_c_normal guibg=none]]

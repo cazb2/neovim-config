@@ -159,6 +159,11 @@ local builtin_plugins = {
     "mason-org/mason-lspconfig.nvim",
   },
   {
+    "jay-babu/mason-nvim-dap.nvim",
+    dependencies = { "mason.nvim", "mfussenegger/nvim-dap" },
+    opts = function() return require "plugins.configs.mason-dap" end,
+  },
+  {
     "nvimtools/none-ls.nvim",
     event = { "BufReadPre", "BufNewFile" },
     dependencies = { "nvimtools/none-ls-extras.nvim" },
@@ -170,6 +175,14 @@ local builtin_plugins = {
     event = "VimEnter",
     lazy = false,
     config = function() require "plugins.configs.lspconfig" end,
+  },
+  {
+    "mfussenegger/nvim-dap",
+    dependencies = {
+      "rcarriga/nvim-dap-ui",
+      "theHamsta/nvim-dap-virtual-text",
+    },
+    config = function() require "plugins.configs.dap" end,
   },
   {
     "hrsh7th/nvim-cmp",
